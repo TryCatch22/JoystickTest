@@ -1,7 +1,8 @@
+using System;
+using GenericGamePad;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System;
 
 namespace JoystickTest
 {
@@ -18,18 +19,28 @@ namespace JoystickTest
 		public SpriteFont Font;
 		public Texture2D Pixel;
 
+		private bool usingXInput;
+
 		private GraphicsDeviceManager graphics;
 		private SpriteBatch spriteBatch;
 
-		private GamePadState gamePadStateP1;
 		private KeyboardState keyboardState;
+		private GamePadState gamePadStateP1;
+		private DirectInputGamePad diGamePadP1;
 
 		private Vector2 rightJoystickValue;
 		private Point rightJoystickRelativePosition;
-		private bool[,] paint;
+		private bool[,] rightPaint;
 
-		private Vector2 boxTopLeft;
-		private Vector2 boxCenter;
+		private Vector2 rightBoxTopLeft;
+		private Vector2 rightBoxCenter;
+
+		private Vector2 leftJoystickValue;
+		private Point leftJoystickRelativePosition;
+		private bool[,] leftPaint;
+
+		private Vector2 leftBoxTopLeft;
+		private Vector2 leftBoxCenter;
 
 		public Game1()
 		{
@@ -38,11 +49,12 @@ namespace JoystickTest
 
 			TargetElapsedTime = TimeSpan.FromSeconds(1f / Fps);
 
-			ScreenSize = new Vector2(1000, 600);
+			ScreenSize = new Vector2(1280, 800);
 
+			graphics.IsFullScreen = false;
 			graphics.PreferredBackBufferWidth = (int)ScreenSize.X;
 			graphics.PreferredBackBufferHeight = (int)ScreenSize.Y;
-
+			
 			IsMouseVisible = true;
 		}
 
@@ -50,10 +62,18 @@ namespace JoystickTest
 		{
 			base.Initialize();
 
-			boxTopLeft = new Vector2(ScreenSize.X - BoxSize - BoxPadding, BoxPadding);
-			boxCenter = new Vector2(boxTopLeft.X + BoxSize / 2f, boxTopLeft.Y + BoxSize / 2f);
+			if (GamePad.GetState(PlayerIndex.One).IsConnected)
+				usingXInput = true;
+			else
+				diGamePadP1 = DirectInputGamePad.GamePads[0];
 
-			ClearBox();
+			rightBoxTopLeft = new Vector2(ScreenSize.X - BoxSize - BoxPadding, 2 * BoxPadding);
+			rightBoxCenter = new Vector2(rightBoxTopLeft.X + BoxSize / 2f, rightBoxTopLeft.Y + BoxSize / 2f);
+
+			leftBoxTopLeft = new Vector2(BoxPadding, 2 * BoxPadding);
+			leftBoxCenter = new Vector2(leftBoxTopLeft.X + BoxSize / 2f, leftBoxTopLeft.Y + BoxSize / 2f);
+
+			ClearBoxes();
 		}
 
 		protected override void LoadContent()
@@ -71,23 +91,46 @@ namespace JoystickTest
 			gamePadStateP1 = GamePad.GetState(PlayerIndex.One, GamePadDeadZone.Circular);
 			keyboardState = Keyboard.GetState();
 
-			if ((gamePadStateP1.Buttons.Back == ButtonState.Pressed) || (keyboardState.IsKeyDown(Keys.Escape)))
+			if (keyboardState.IsKeyDown(Keys.Escape))
 				this.Exit();
 
-			if ((gamePadStateP1.Buttons.Start == ButtonState.Pressed) || (keyboardState.IsKeyDown(Keys.Space)))
-				ClearBox();
+			if (keyboardState.IsKeyDown(Keys.Space))
+				ClearBoxes();
 
-			rightJoystickValue = gamePadStateP1.ThumbSticks.Right;
-			rightJoystickRelativePosition = new Point((int)(BoxSize / 2f + rightJoystickValue.X * BoxSize / 2f), (int)(BoxSize / 2f - rightJoystickValue.Y * BoxSize / 2f));
+			if (usingXInput)
+			{
+				if ((gamePadStateP1.Buttons.Back == ButtonState.Pressed))
+					this.Exit();
 
-			paint[rightJoystickRelativePosition.X, rightJoystickRelativePosition.Y] = true;
+				if ((gamePadStateP1.Buttons.Start == ButtonState.Pressed))
+					ClearBoxes();
+
+				rightJoystickValue = gamePadStateP1.ThumbSticks.Right;
+				rightJoystickRelativePosition = new Point((int)(BoxSize / 2f + rightJoystickValue.X * BoxSize / 2f), (int)(BoxSize / 2f - rightJoystickValue.Y * BoxSize / 2f));
+				rightPaint[rightJoystickRelativePosition.X, rightJoystickRelativePosition.Y] = true;
+
+				leftJoystickValue = gamePadStateP1.ThumbSticks.Left;
+				leftJoystickRelativePosition = new Point((int)(BoxSize / 2f + leftJoystickValue.X * BoxSize / 2f), (int)(BoxSize / 2f - leftJoystickValue.Y * BoxSize / 2f));
+				leftPaint[leftJoystickRelativePosition.X, leftJoystickRelativePosition.Y] = true;
+			}
+			else
+			{
+				rightJoystickValue = diGamePadP1.ThumbSticks.Right;
+				rightJoystickRelativePosition = new Point((int)(BoxSize / 2f + rightJoystickValue.X * BoxSize / 2f), (int)(BoxSize / 2f + rightJoystickValue.Y * BoxSize / 2f));
+				rightPaint[rightJoystickRelativePosition.X, rightJoystickRelativePosition.Y] = true;
+
+				leftJoystickValue = diGamePadP1.ThumbSticks.Left;
+				leftJoystickRelativePosition = new Point((int)(BoxSize / 2f + leftJoystickValue.X * BoxSize / 2f), (int)(BoxSize / 2f + leftJoystickValue.Y * BoxSize / 2f));
+				leftPaint[leftJoystickRelativePosition.X, leftJoystickRelativePosition.Y] = true;
+			}
 
 			base.Update(gameTime);
 		}
 
-		private void ClearBox()
+		private void ClearBoxes()
 		{
-			paint = new bool[BoxSize + 1, BoxSize + 1];
+			rightPaint = new bool[BoxSize + 1, BoxSize + 1];
+			leftPaint = new bool[BoxSize + 1, BoxSize + 1];
 		}
 
 		protected override void Draw(GameTime gameTime)
@@ -95,20 +138,37 @@ namespace JoystickTest
 			GraphicsDevice.Clear(Color.CornflowerBlue);
 
 			spriteBatch.Begin();
-			spriteBatch.DrawString(Font, "X: " + (rightJoystickValue.X < 0 ? "" : " ") + rightJoystickValue.X, new Vector2(10, 10), Color.Black);
-			spriteBatch.DrawString(Font, "Y: " + (rightJoystickValue.Y < 0 ? "" : " ") + rightJoystickValue.Y, new Vector2(10, 50), Color.Black);
+			// right stick
+			spriteBatch.DrawString(Font, "X: " + (rightJoystickValue.X < 0 ? "" : " ") + rightJoystickValue.X, rightBoxTopLeft - new Vector2(0, 2 * BoxPadding), Color.Black);
+			spriteBatch.DrawString(Font, "Y: " + (rightJoystickValue.Y < 0 ? "" : " ") + rightJoystickValue.Y, rightBoxTopLeft - new Vector2(0, BoxPadding), Color.Black);
 
-			for (int i = 0; i < paint.GetLength(0); i++)
-				for (int j = 0; j < paint.GetLength(1); j++)
-					if (paint[i, j])
-						spriteBatch.Draw(Pixel, new Rectangle((int)(boxTopLeft.X + i ) - 1, (int)(boxTopLeft.Y + j) - 1, LineWeight, LineWeight), Color.Red);
+			for (int i = 0; i < rightPaint.GetLength(0); i++)
+				for (int j = 0; j < rightPaint.GetLength(1); j++)
+					if (rightPaint[i, j])
+						spriteBatch.Draw(Pixel, new Rectangle((int)(rightBoxTopLeft.X + i ) - 1, (int)(rightBoxTopLeft.Y + j) - 1, LineWeight, LineWeight), Color.Red);
 
-			spriteBatch.Draw(Pixel, new Rectangle((int)boxTopLeft.X, (int)boxTopLeft.Y, BoxSize, LineWeight), Color.Black);
-			spriteBatch.Draw(Pixel, new Rectangle((int)boxTopLeft.X, (int)boxTopLeft.Y, LineWeight, BoxSize), Color.Black);
-			spriteBatch.Draw(Pixel, new Rectangle((int)boxTopLeft.X, (int)(boxTopLeft.Y + BoxSize), BoxSize, LineWeight), Color.Black);
-			spriteBatch.Draw(Pixel, new Rectangle((int)(boxTopLeft.X + BoxSize), (int)boxTopLeft.Y, LineWeight, BoxSize), Color.Black);
+			spriteBatch.Draw(Pixel, new Rectangle((int)rightBoxTopLeft.X, (int)rightBoxTopLeft.Y, BoxSize, LineWeight), Color.Black);
+			spriteBatch.Draw(Pixel, new Rectangle((int)rightBoxTopLeft.X, (int)rightBoxTopLeft.Y, LineWeight, BoxSize), Color.Black);
+			spriteBatch.Draw(Pixel, new Rectangle((int)rightBoxTopLeft.X, (int)(rightBoxTopLeft.Y + BoxSize), BoxSize, LineWeight), Color.Black);
+			spriteBatch.Draw(Pixel, new Rectangle((int)(rightBoxTopLeft.X + BoxSize), (int)rightBoxTopLeft.Y, LineWeight, BoxSize), Color.Black);
 
-			spriteBatch.Draw(Pixel, new Rectangle((int)(boxTopLeft.X + rightJoystickRelativePosition.X), (int)(boxTopLeft.Y + rightJoystickRelativePosition.Y), 2 * LineWeight, 2 * LineWeight), Color.Green);
+			spriteBatch.Draw(Pixel, new Rectangle((int)(rightBoxTopLeft.X + rightJoystickRelativePosition.X), (int)(rightBoxTopLeft.Y + rightJoystickRelativePosition.Y), 2 * LineWeight, 2 * LineWeight), Color.Green);
+
+			// left stick
+			spriteBatch.DrawString(Font, "X: " + (leftJoystickValue.X < 0 ? "" : " ") + leftJoystickValue.X, leftBoxTopLeft - new Vector2(0, 2 * BoxPadding), Color.Black);
+			spriteBatch.DrawString(Font, "Y: " + (leftJoystickValue.Y < 0 ? "" : " ") + leftJoystickValue.Y, leftBoxTopLeft - new Vector2(0, BoxPadding), Color.Black);
+
+			for (int i = 0; i < leftPaint.GetLength(0); i++)
+				for (int j = 0; j < leftPaint.GetLength(1); j++)
+					if (leftPaint[i, j])
+						spriteBatch.Draw(Pixel, new Rectangle((int)(leftBoxTopLeft.X + i) - 1, (int)(leftBoxTopLeft.Y + j) - 1, LineWeight, LineWeight), Color.Red);
+
+			spriteBatch.Draw(Pixel, new Rectangle((int)leftBoxTopLeft.X, (int)leftBoxTopLeft.Y, BoxSize, LineWeight), Color.Black);
+			spriteBatch.Draw(Pixel, new Rectangle((int)leftBoxTopLeft.X, (int)leftBoxTopLeft.Y, LineWeight, BoxSize), Color.Black);
+			spriteBatch.Draw(Pixel, new Rectangle((int)leftBoxTopLeft.X, (int)(leftBoxTopLeft.Y + BoxSize), BoxSize, LineWeight), Color.Black);
+			spriteBatch.Draw(Pixel, new Rectangle((int)(leftBoxTopLeft.X + BoxSize), (int)leftBoxTopLeft.Y, LineWeight, BoxSize), Color.Black);
+
+			spriteBatch.Draw(Pixel, new Rectangle((int)(leftBoxTopLeft.X + leftJoystickRelativePosition.X), (int)(leftBoxTopLeft.Y + leftJoystickRelativePosition.Y), 2 * LineWeight, 2 * LineWeight), Color.Green);
 
 			spriteBatch.End();
 
