@@ -8,7 +8,7 @@ namespace GenericGamePad
 		public Vector2 Left;
 		public Vector2 Right;
 
-		private const float Center = 32767.5f;
+		private const float Center = 32767f;
 
 		public DirectInputThumbSticks(Device device)
 		{
