@@ -87,8 +87,8 @@ namespace JoystickTest
 			}
 			else
 			{
-				leftPane.Update(diGamePadP1.ThumbSticks.Left);
-				rightPane.Update(diGamePadP1.ThumbSticks.Right);
+				leftPane.Update(new Vector2(diGamePadP1.ThumbSticks.Left.X, -diGamePadP1.ThumbSticks.Left.Y));
+				rightPane.Update(new Vector2(diGamePadP1.ThumbSticks.Right.X, -diGamePadP1.ThumbSticks.Right.Y));
 			}
 
 			base.Update(gameTime);
