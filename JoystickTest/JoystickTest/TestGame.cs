@@ -87,6 +87,9 @@ namespace JoystickTest
 			{
 				leftPane.Update(gamePadStateP1.ThumbSticks.Left);
 				rightPane.Update(gamePadStateP1.ThumbSticks.Right);
+
+				GamePadDPad dPad = gamePadStateP1.DPad;
+				dPadPane.Update(dPad.Up, dPad.Down, dPad.Left, dPad.Right);
 			}
 			else
 			{
