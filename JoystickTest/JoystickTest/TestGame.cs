@@ -25,6 +25,7 @@ namespace JoystickTest
 		private DirectInputGamePad diGamePadP1;
 
 		private JoystickPane leftPane, rightPane;
+		private DPadPane dPadPane;
 
 		public TestGame()
 		{
@@ -53,6 +54,8 @@ namespace JoystickTest
 
 			leftPane = new JoystickPane(new Vector2(JoystickPane.BoxPadding, 2 * JoystickPane.BoxPadding));
 			rightPane = new JoystickPane(new Vector2(ScreenSize.X - JoystickPane.BoxSize - JoystickPane.BoxPadding, 2 * JoystickPane.BoxPadding));
+
+			dPadPane = new DPadPane(new Vector2(JoystickPane.BoxPadding, ScreenSize.Y - 2.5f * JoystickPane.BoxPadding));
 
 			ClearBoxes();
 		}
@@ -89,6 +92,9 @@ namespace JoystickTest
 			{
 				leftPane.Update(new Vector2(diGamePadP1.ThumbSticks.Left.X, -diGamePadP1.ThumbSticks.Left.Y));
 				rightPane.Update(new Vector2(diGamePadP1.ThumbSticks.Right.X, -diGamePadP1.ThumbSticks.Right.Y));
+
+				DirectInputDPad dPad = diGamePadP1.DPad;
+				dPadPane.Update(dPad.Up, dPad.Down, dPad.Left, dPad.Right);
 			}
 
 			base.Update(gameTime);
@@ -108,6 +114,8 @@ namespace JoystickTest
 
 			leftPane.Draw(spriteBatch);
 			rightPane.Draw(spriteBatch);
+
+			dPadPane.Draw(spriteBatch);
 
 			spriteBatch.End();
 
