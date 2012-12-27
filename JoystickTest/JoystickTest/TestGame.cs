@@ -99,6 +99,19 @@ namespace JoystickTest
 
 				GamePadDPad dPad = gamePadStateP1.DPad;
 				dPadPane.Update(dPad.Up, dPad.Down, dPad.Left, dPad.Right);
+
+				buttonPanes[0].Update(gamePadStateP1.Buttons.A == ButtonState.Pressed);
+				buttonPanes[1].Update(gamePadStateP1.Buttons.B == ButtonState.Pressed);
+				buttonPanes[2].Update(gamePadStateP1.Buttons.X == ButtonState.Pressed);
+				buttonPanes[3].Update(gamePadStateP1.Buttons.Y == ButtonState.Pressed);
+				buttonPanes[4].Update(gamePadStateP1.Buttons.LeftShoulder == ButtonState.Pressed);
+				buttonPanes[5].Update(gamePadStateP1.Triggers.Left > 0f);
+				buttonPanes[6].Update(gamePadStateP1.Buttons.LeftStick == ButtonState.Pressed);
+				buttonPanes[7].Update(gamePadStateP1.Buttons.RightShoulder == ButtonState.Pressed);
+				buttonPanes[8].Update(gamePadStateP1.Triggers.Right > 0f);
+				buttonPanes[9].Update(gamePadStateP1.Buttons.RightStick == ButtonState.Pressed);
+				buttonPanes[10].Update(gamePadStateP1.Buttons.Back == ButtonState.Pressed);
+				buttonPanes[11].Update(gamePadStateP1.Buttons.Start == ButtonState.Pressed);
 			}
 			else
 			{
