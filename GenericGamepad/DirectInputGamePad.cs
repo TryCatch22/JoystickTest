@@ -43,5 +43,7 @@ namespace GenericGamePad
 		public DirectInputThumbSticks ThumbSticks { get { return new DirectInputThumbSticks(Device); } }
 
 		public DirectInputDPad DPad { get { return new DirectInputDPad(Device); } }
+
+		public DirectInputButtons Buttons { get { return new DirectInputButtons(Device); } }
 	}
 }

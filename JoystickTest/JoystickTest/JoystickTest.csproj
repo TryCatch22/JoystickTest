@@ -72,6 +72,7 @@
     <Reference Include="System.Net" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ButtonPane.cs" />
     <Compile Include="DPadPane.cs" />
     <Compile Include="JoystickPane.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

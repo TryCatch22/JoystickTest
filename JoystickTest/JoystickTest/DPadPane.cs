@@ -8,9 +8,12 @@ namespace JoystickTest
 	{
 		public const int Padding = 25;
 
-		private Vector2 boxTopLeft;
+		public bool Up { get; private set; }
+		public bool Down { get; private set; }
+		public bool Left { get; private set; }
+		public bool Right { get; private set; }
 
-		private bool up, down, left, right;
+		private Vector2 boxTopLeft;
 
 		private Rectangle upBounds, downBounds, leftBounds, rightBounds;
 
@@ -18,7 +21,7 @@ namespace JoystickTest
 		{
 			this.boxTopLeft = boxTopLeft;
 
-			up = down = left = right = false;
+			Up = Down = Left = Right = false;
 
 			upBounds = new Rectangle((int)boxTopLeft.X + Padding, (int)boxTopLeft.Y, Padding, Padding);
 			downBounds = new Rectangle((int)boxTopLeft.X + Padding, (int)boxTopLeft.Y + 2 * Padding, Padding, Padding);
@@ -28,18 +31,18 @@ namespace JoystickTest
 
 		public void Update(ButtonState up, ButtonState down, ButtonState left, ButtonState right)
 		{
-			this.up = up == ButtonState.Pressed;
-			this.down = down == ButtonState.Pressed;
-			this.left = left == ButtonState.Pressed;
-			this.right = right == ButtonState.Pressed;
+			this.Up = up == ButtonState.Pressed;
+			this.Down = down == ButtonState.Pressed;
+			this.Left = left == ButtonState.Pressed;
+			this.Right = right == ButtonState.Pressed;
 		}
 
 		public void Draw(SpriteBatch spriteBatch)
 		{
-			spriteBatch.Draw(TestGame.Pixel, upBounds, up ? Color.Red : Color.Black);
-			spriteBatch.Draw(TestGame.Pixel, downBounds, down ? Color.Red : Color.Black);
-			spriteBatch.Draw(TestGame.Pixel, leftBounds, left ? Color.Red : Color.Black);
-			spriteBatch.Draw(TestGame.Pixel, rightBounds, right ? Color.Red : Color.Black);
+			spriteBatch.Draw(TestGame.Pixel, upBounds, Up ? Color.Red : Color.Black);
+			spriteBatch.Draw(TestGame.Pixel, downBounds, Down ? Color.Red : Color.Black);
+			spriteBatch.Draw(TestGame.Pixel, leftBounds, Left ? Color.Red : Color.Black);
+			spriteBatch.Draw(TestGame.Pixel, rightBounds, Right ? Color.Red : Color.Black);
 		}
 	}
 }

@@ -63,6 +63,7 @@
     <Reference Include="System.Net" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DirectInputButtons.cs" />
     <Compile Include="DirectInputDPad.cs" />
     <Compile Include="DirectInputGamePad.cs" />
     <Compile Include="DirectInputThumbSticks.cs" />

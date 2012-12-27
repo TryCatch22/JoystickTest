@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using GenericGamePad;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -26,6 +27,7 @@ namespace JoystickTest
 
 		private JoystickPane leftPane, rightPane;
 		private DPadPane dPadPane;
+		private List<ButtonPane> buttonPanes;
 
 		public TestGame()
 		{
@@ -56,6 +58,13 @@ namespace JoystickTest
 			rightPane = new JoystickPane(new Vector2(ScreenSize.X - JoystickPane.BoxSize - JoystickPane.BoxPadding, 2 * JoystickPane.BoxPadding));
 
 			dPadPane = new DPadPane(new Vector2(JoystickPane.BoxPadding, ScreenSize.Y - 2.5f * JoystickPane.BoxPadding));
+
+			buttonPanes = new List<ButtonPane>();
+
+			List<string> names = new List<string>() { "A", "B", "X", "Y", "LB", "LT", "LS", "RB", "RT", "RS", "Bk", "St" };
+
+			for (int i = 0; i < names.Count; i++)
+				buttonPanes.Add(new ButtonPane(names[i], new Vector2(ScreenSize.X - 2 * (i + 2) * ButtonPane.Padding, ScreenSize.Y - 4 * ButtonPane.Padding)));
 
 			ClearBoxes();
 		}
@@ -98,6 +107,19 @@ namespace JoystickTest
 
 				DirectInputDPad dPad = diGamePadP1.DPad;
 				dPadPane.Update(dPad.Up, dPad.Down, dPad.Left, dPad.Right);
+
+				buttonPanes[0].Update(diGamePadP1.Buttons.A == ButtonState.Pressed);
+				buttonPanes[1].Update(diGamePadP1.Buttons.B == ButtonState.Pressed);
+				buttonPanes[2].Update(diGamePadP1.Buttons.X == ButtonState.Pressed);
+				buttonPanes[3].Update(diGamePadP1.Buttons.Y == ButtonState.Pressed);
+				buttonPanes[4].Update(diGamePadP1.Buttons.LeftBumper == ButtonState.Pressed);
+				buttonPanes[5].Update(diGamePadP1.Buttons.LeftTrigger == ButtonState.Pressed);
+				buttonPanes[6].Update(diGamePadP1.Buttons.LeftStick == ButtonState.Pressed);
+				buttonPanes[7].Update(diGamePadP1.Buttons.RightBumper == ButtonState.Pressed);
+				buttonPanes[8].Update(diGamePadP1.Buttons.RightTrigger == ButtonState.Pressed);
+				buttonPanes[9].Update(diGamePadP1.Buttons.RightStick == ButtonState.Pressed);
+				buttonPanes[10].Update(diGamePadP1.Buttons.Back == ButtonState.Pressed);
+				buttonPanes[11].Update(diGamePadP1.Buttons.Start == ButtonState.Pressed);
 			}
 
 			base.Update(gameTime);
@@ -119,6 +141,9 @@ namespace JoystickTest
 			rightPane.Draw(spriteBatch);
 
 			dPadPane.Draw(spriteBatch);
+
+			foreach (ButtonPane buttonPane in buttonPanes)
+				buttonPane.Draw(spriteBatch);
 
 			spriteBatch.End();
 
